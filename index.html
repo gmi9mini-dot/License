@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ระบบใบอนุญาต · เขตคันนายาว</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{--navy:#0D2D4E;--blue:#1F4E79;--mid:#2E75B6;--light:#DEEAF1;--accent:#00B4D8;--ok:#1D7A1D;--warn:#C05000;--err:#B00000;--bg:#F0F4F8;--card:#fff;--border:#CBD5E0;--text:#1A202C;--muted:#718096}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -209,11 +208,13 @@ mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
 <!-- ── LOGIN GATE ── -->
 <div id="gate">
   <div class="gate-card">
-    <div class="gate-ico">🔐</div>
+    <div class="gate-ico">👤</div>
     <h2>ระบบใบอนุญาต</h2>
-    <p>สำนักงานเขตคันนายาว · ฝ่ายสิ่งแวดล้อมฯ<br>กรุณาเข้าสู่ระบบเพื่อใช้งาน</p>
-    <div id="g-signin"></div>
-    <div class="gate-foot">ใช้บัญชี Google ในการเข้าสู่ระบบ<br>ทุกการเปลี่ยนแปลงจะถูกบันทึกพร้อมชื่อผู้ใช้</div>
+    <p>สำนักงานเขตคันนายาว · ฝ่ายสิ่งแวดล้อมฯ<br>กรุณาระบุชื่อก่อนเข้าใช้งาน</p>
+    <input type="text" id="nameInput" placeholder="ชื่อ-นามสกุล หรือชื่อเล่น" style="width:100%;padding:11px 13px;border:1.5px solid #CBD5E0;border-radius:9px;font-family:'Sarabun',sans-serif;font-size:14px;outline:none;margin-bottom:10px" autocomplete="name">
+    <input type="text" id="deptInput" placeholder="ตำแหน่ง/หน่วยงาน (ไม่บังคับ)" style="width:100%;padding:11px 13px;border:1.5px solid #CBD5E0;border-radius:9px;font-family:'Sarabun',sans-serif;font-size:14px;outline:none;margin-bottom:14px">
+    <button class="gate-btn" onclick="handleNameLogin()" style="background:#1F4E79;color:#fff;border-color:#1F4E79;width:100%">เข้าสู่ระบบ →</button>
+    <div class="gate-foot">ชื่อนี้จะถูกบันทึกไว้กับทุกการแก้ไข<br>เพื่อให้ทีมงานทราบว่าใครเป็นคนเพิ่ม/แก้ข้อมูล</div>
   </div>
 </div>
 
@@ -476,15 +477,8 @@ mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
 // CONFIG — ตั้งค่าก่อนใช้งานครั้งแรก
 // ═════════════════════════════════════
 const CONFIG = {
-  // 1) URL ของ Google Apps Script Web App (ดูคู่มือติดตั้ง)
-  API_URL: 'https://script.google.com/macros/s/AKfycbzfyp8_zn-ln6UuGa75deJO-9ENaWTofyZP9HEdT_M1FjH_vggh2C0wCd7YZBlUJ3_1qg/exec',
-
-  // 2) Google OAuth Client ID (สร้างใน Google Cloud Console)
-  GOOGLE_CLIENT_ID: '1048324220982-s4bf5nvtsdm9fbf04dp90ai8godjens8.apps.googleusercontent.com',
-
-  // 3) อีเมลที่อนุญาตให้ใช้งาน (ว่าง = ทุกคนที่มี Google Account ใช้ได้)
-  ALLOWED_EMAILS: [
-   ],
+  // URL ของ Google Apps Script Web App (ดูคู่มือติดตั้ง)
+  API_URL: 'PASTE_YOUR_APPS_SCRIPT_URL_HERE',
 };
 
 // ═════════════════════════════════════
@@ -548,48 +542,39 @@ function initApp(){
 }
 
 // ═════════════════════════════════════
-// AUTH (Google Sign-In)
+// AUTH (Simple name-based login)
 // ═════════════════════════════════════
 function showLoginGate(){
   document.getElementById('gate').classList.add('show');
   document.getElementById('app').style.display = 'none';
+  setTimeout(()=>document.getElementById('nameInput')?.focus(), 200);
 
-  // wait for Google library
-  const tryRender = () => {
-    if(window.google && window.google.accounts){
-      google.accounts.id.initialize({
-        client_id: CONFIG.GOOGLE_CLIENT_ID,
-        callback: handleGoogleLogin,
-      });
-      google.accounts.id.renderButton(
-        document.getElementById('g-signin'),
-        { theme:'outline', size:'large', text:'signin_with', locale:'th' }
-      );
-    } else {
-      setTimeout(tryRender, 200);
-    }
+  // ENTER key submits
+  document.getElementById('nameInput').onkeydown = e=>{
+    if(e.key==='Enter') handleNameLogin();
   };
-  tryRender();
+  document.getElementById('deptInput').onkeydown = e=>{
+    if(e.key==='Enter') handleNameLogin();
+  };
 }
 
-function handleGoogleLogin(response){
-  // decode JWT payload (no verification on client — server should verify)
-  const payload = JSON.parse(atob(response.credential.split('.')[1]));
-  const user = {
-    email: payload.email,
-    name: payload.name,
-    picture: payload.picture,
-    token: response.credential,
-  };
-
-  // check allowed list
-  if(CONFIG.ALLOWED_EMAILS.length > 0 && !CONFIG.ALLOWED_EMAILS.includes(user.email)){
-    showToast('❌ บัญชี '+user.email+' ไม่ได้รับอนุญาต', 'err');
+function handleNameLogin(){
+  const name = document.getElementById('nameInput').value.trim();
+  const dept = document.getElementById('deptInput').value.trim();
+  if(!name){
+    showToast('⚠️ กรุณาระบุชื่อ', 'err');
     return;
   }
-
-  currentUser = user;
-  localStorage.setItem('lic_user', JSON.stringify(user));
+  if(name.length < 2){
+    showToast('⚠️ ชื่อสั้นเกินไป', 'err');
+    return;
+  }
+  currentUser = {
+    name: name,
+    dept: dept,
+    email: '', // ไม่ใช้
+  };
+  localStorage.setItem('lic_user', JSON.stringify(currentUser));
   onLoginSuccess();
 }
 
@@ -597,13 +582,10 @@ function onLoginSuccess(){
   document.getElementById('gate').classList.remove('show');
   document.getElementById('app').style.display = 'block';
 
-  // set avatar
+  // set avatar with initial
   const av = document.getElementById('uavatar');
-  if(currentUser.picture){
-    av.innerHTML = `<img src="${currentUser.picture}" alt="">`;
-  } else {
-    av.textContent = (currentUser.name||currentUser.email||'?').charAt(0).toUpperCase();
-  }
+  const initial = (currentUser.name || '?').charAt(0).toUpperCase();
+  av.textContent = initial;
 
   // load data
   reloadAll();
@@ -617,8 +599,9 @@ function logout(){
 }
 
 function toggleUserMenu(){
-  const name = currentUser?.name || currentUser?.email || '';
-  if(confirm(`เข้าใช้งานในชื่อ: ${name}\n\nต้องการออกจากระบบหรือไม่?`)){
+  const name = currentUser?.name || '';
+  const dept = currentUser?.dept ? ` (${currentUser.dept})` : '';
+  if(confirm(`ผู้ใช้งาน: ${name}${dept}\n\nต้องการเปลี่ยนชื่อ/ออกจากระบบหรือไม่?`)){
     logout();
   }
 }
@@ -634,12 +617,11 @@ async function apiCall(action, payload={}){
   try{
     const body = JSON.stringify({
       action,
-      user: currentUser ? {email:currentUser.email, name:currentUser.name, token:currentUser.token} : null,
+      user: currentUser ? {name:currentUser.name, dept:currentUser.dept||''} : null,
       payload,
     });
     const res = await fetch(CONFIG.API_URL, {
       method: 'POST',
-      // Apps Script Web App needs text/plain to avoid preflight
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body,
     });
@@ -1167,7 +1149,7 @@ function expJSON(){
     ...rest,
     attachments: (attachments||[]).map(a=>({name:a.name, type:a.type, url:a.url}))
   }));
-  const json = JSON.stringify({exportedAt:new Date().toISOString(), exportedBy:currentUser?.email, records:nr}, null, 2);
+  const json = JSON.stringify({exportedAt:new Date().toISOString(), exportedBy:currentUser?.name, records:nr}, null, 2);
   dlFile(json, 'application/json;charset=utf-8', 'ใบอนุญาต_backup_'+fmtDate()+'.json');
   if(!isSafariIOS()) showToast('✅ ดาวน์โหลด JSON แล้ว','ok');
 }
