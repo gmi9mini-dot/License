@@ -155,7 +155,7 @@ mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
 .rmeta{font-size:11px;color:var(--muted);margin-top:2px}
 .rmeta-ver{font-size:10px;color:var(--mid);font-weight:700;margin-top:2px}
 .rst{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;align-self:center}
-.rs-มีผล{background:#E6F4E6;color:#1D7A1D}.rs-หมดอายุ{background:#FDECEA;color:#B00000}.rs-ใกล้หมดอายุ{background:#FEF3E2;color:#C05000}.rs-รอดำเนินการ{background:#DEEAF1;color:#2E75B6}
+.rs-มีผล{background:#E6F4E6;color:#1D7A1D}.rs-หมดอายุ{background:#FDECEA;color:#B00000}.rs-ใกล้หมดอายุ{background:#FEF3E2;color:#C05000}.rs-รอดำเนินการ{background:#DEEAF1;color:#2E75B6}.rs-ยกเลิก{background:#E8E8E8;color:#616161;text-decoration:line-through}
 .rdel{position:absolute;top:8px;right:8px;background:none;border:none;color:#CBD5E0;font-size:14px;cursor:pointer;padding:2px 4px;border-radius:5px}
 .rdel:hover{background:#FDECEA;color:#B00000}
 .empty{text-align:center;padding:48px 16px;color:var(--muted)}
@@ -268,19 +268,31 @@ mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
               </div>
 
               <div class="fg-row">
-                <label>ประเภทใบอนุญาต <span class="req">*</span></label>
-                <select id="f_type">
+                <label>ประเภทใบอนุญาต/หนังสือรับรองการแจ้ง <span class="req">*</span></label>
+                <select id="f_type" onchange="onTypeChange()">
                   <option value="">— เลือก —</option>
                   <option value="กิจการที่เป็นอันตรายต่อสุขภาพ (อภ.2)">กิจการที่เป็นอันตรายต่อสุขภาพ (อภ.2)</option>
                   <option value="จำหน่ายอาหาร / สถานที่จำหน่ายอาหาร (สอ.4)">จำหน่ายอาหาร / สถานที่จำหน่ายอาหาร (สอ.4)</option>
                   <option value="สะสมอาหาร (สอ.5)">สะสมอาหาร (สอ.5)</option>
                   <option value="ตลาด / ที่จำหน่ายสินค้าในที่/ทางสาธารณะ">ตลาด / ที่จำหน่ายสินค้าในที่/ทางสาธารณะ</option>
+                  <option value="หนังสือรับรองการแจ้ง (พื้นที่ ≤ 200 ตร.ม.)">หนังสือรับรองการแจ้ง (พื้นที่ ≤ 200 ตร.ม.)</option>
+                  <option value="เก็บ ขน หรือกำจัดสิ่งปฏิกูล/มูลฝอย">เก็บ ขน หรือกำจัดสิ่งปฏิกูล/มูลฝอย</option>
                 </select>
               </div>
 
               <div class="fg-row full">
-                <label>หมวดประเภทย่อย</label>
-                <input id="f_subtype" type="text" placeholder="เช่น ร้านอาหารตามสั่ง, ร้านขายของชำ, โรงงานเย็บผ้า">
+                <label>กลุ่มกิจการหลัก (สำหรับ อภ.2)</label>
+                <select id="f_group" onchange="onGroupChange()">
+                  <option value="">— เลือกกลุ่ม —</option>
+                </select>
+              </div>
+
+              <div class="fg-row full">
+                <label>ประเภทการประกอบกิจการ</label>
+                <select id="f_subtype">
+                  <option value="">— เลือกประเภท —</option>
+                </select>
+                <div class="fg-hint" style="margin-top:3px">เลือกได้หลังจากเลือกกลุ่มกิจการหลัก หรือพิมพ์เพิ่มเติมในหมายเหตุ</div>
               </div>
 
               <div class="fg-row">
@@ -295,6 +307,7 @@ mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
                   <option value="ใกล้หมดอายุ">ใกล้หมดอายุ</option>
                   <option value="หมดอายุ">หมดอายุ</option>
                   <option value="รอดำเนินการ">รอดำเนินการ</option>
+                  <option value="ยกเลิก">ยกเลิก</option>
                 </select>
               </div>
 
@@ -338,9 +351,24 @@ mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
                 <input id="f_workers" type="text" placeholder="0" inputmode="numeric">
               </div>
 
+              <div class="fg-row">
+                <label>กำลังเครื่องจักร (แรงม้า)</label>
+                <input id="f_horsepower" type="text" placeholder="0" inputmode="decimal">
+              </div>
+
+              <div class="fg-row">
+                <label>พื้นที่รับผิดชอบ</label>
+                <input id="f_zone" type="text" placeholder="ชื่อเจ้าหน้าที่ หรือเลขพื้นที่ (เช่น พื้นที่ 3)">
+              </div>
+
               <div class="fg-row full">
                 <label>ที่อยู่ / สถานที่ประกอบการ</label>
                 <input id="f_addr" type="text" placeholder="บ้านเลขที่ ซอย ถนน">
+              </div>
+
+              <div class="fg-row">
+                <label>แขวง / ตำบล</label>
+                <input id="f_subdistrict" type="text" placeholder="แขวง/ตำบล">
               </div>
 
               <div class="fg-row">
@@ -427,6 +455,7 @@ mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
             <button class="chip" data-s="มีผล" onclick="setF(this)">✅ มีผล</button>
             <button class="chip wn" data-s="ใกล้หมดอายุ" onclick="setF(this)">⚠️ ใกล้หมด</button>
             <button class="chip er" data-s="หมดอายุ" onclick="setF(this)">❌ หมดอายุ</button>
+            <button class="chip" data-s="ยกเลิก" onclick="setF(this)">🚫 ยกเลิก</button>
           </div>
           <div style="display:flex"><span class="rcnt" id="rcnt3"></span></div>
         </div>
@@ -474,11 +503,222 @@ mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
 
 <script>
 // ═════════════════════════════════════
+// ประเภทกิจการอันตรายต่อสุขภาพ (อภ.2)
+// อ้างอิงจากข้อบัญญัติ กทม. พ.ศ. 2561
+// ═════════════════════════════════════
+const BUSINESS_TYPES = {
+  '1. กิจการที่เกี่ยวกับสัตว์เลี้ยง': [
+    'การเพาะพันธุ์ เลี้ยง อนุบาลสัตว์บก',
+    'การเพาะพันธุ์ เลี้ยง อนุบาลสัตว์ปีก',
+    'การเพาะพันธุ์ เลี้ยง อนุบาลสัตว์น้ำ',
+    'การเพาะพันธุ์ เลี้ยง อนุบาลสัตว์เลื้อยคลาน',
+    'การเลี้ยงแมงหรือแมลง',
+    'การเลี้ยงสัตว์เพื่อรีดเอานม',
+    'การประกอบกิจการเลี้ยง รวบรวมสัตว์ เพื่อให้ประชาชนเข้าชม',
+  ],
+  '2. กิจการที่เกี่ยวกับสัตว์และผลิตภัณฑ์': [
+    'การฆ่า หรือชำแหละสัตว์',
+    'การหมัก ฟอก ตาก หนังสัตว์ขนสัตว์',
+    'การสะสมหนังสัตว์ขนสัตว์',
+    'การสะสมเขา กระดูก ชิ้นส่วนสัตว์',
+    'การเคี่ยวหนัง เอ็น หรือไขสัตว์',
+    'การผลิตสิ่งของจากเปลือก กระดอง กระดูก เขา หนัง ขนสัตว์',
+    'การผลิต โม่ ป่น บรรจุ อาหารสัตว์',
+    'การผลิต แปรรูป สะสม หรือล้างครั่ง',
+  ],
+  '3. กิจการที่เกี่ยวกับอาหาร เครื่องดื่ม น้ำดื่ม': [
+    'การผลิต/แบ่งบรรจุ น้ำพริกแกง น้ำพริกปรุงสำเร็จ ซอสปรุงรส',
+    'การผลิต/แบ่งบรรจุ อาหารหมักดองจากสัตว์ (ปลาร้า กะปิ น้ำปลา)',
+    'การผลิต/แบ่งบรรจุ อาหารหมักดองแช่อิ่มจากผักผลไม้',
+    'การผลิต/แบ่งบรรจุ อาหารแปรรูปด้วยความร้อน (ตาก บด นึ่ง ต้ม ตุ๋น ทอด อบ ปิ้ง ย่าง)',
+    'การผลิต/แบ่งบรรจุ ลูกชิ้น',
+    'การผลิต/แบ่งบรรจุ เส้นหมี่ ขนมจีน ก๋วยเตี๋ยว เต้าหู้ วุ้นเส้น',
+    'การผลิตบะหมี่ มักกะโรนี สปาเกตตี้ พาสตา',
+    'การผลิตขนมปังสด ขนมปังแห้ง ขนมเปี๊ยะ ขนมอบ',
+    'การผลิต/แบ่งบรรจุ น้ำนม หรือผลิตภัณฑ์จากน้ำนมสัตว์',
+    'การผลิต/แบ่งบรรจุ เนย เนยเทียม ผลิตภัณฑ์เนย',
+    'การผลิตไอศกรีม',
+    'การคั่ว/แบ่งบรรจุ กาแฟ',
+    'การผลิต/แบ่งบรรจุ ใบชาแห้ง ชาผง เครื่องดื่มชนิดผง',
+    'การผลิต/แบ่งบรรจุ เอทิลแอลกอฮอล์ สุรา เบียร์ ไวน์ น้ำส้มสายชู',
+    'การผลิตน้ำกลั่น น้ำบริโภค',
+    'การผลิตน้ำดื่มจากเครื่องจำหน่ายอัตโนมัติ',
+    'การผลิต/แบ่งบรรจุ/ขนส่ง น้ำแข็ง',
+    'การผลิต/แบ่งบรรจุ น้ำอัดลม น้ำหวาน น้ำผลไม้ เครื่องดื่ม',
+    'การผลิต/แบ่งบรรจุ อาหารบรรจุกระป๋อง ขวด',
+    'การผลิต/แบ่งบรรจุ ผงชูรส สารปรุงแต่งอาหาร',
+    'การผลิต/แบ่งบรรจุ น้ำตาล น้ำเชื่อม',
+    'การผลิต/แบ่งบรรจุ แบะแซ',
+    'การแกะ ตัดแต่ง ล้างสัตว์น้ำ',
+    'การประกอบกิจการห้องเย็น แช่แข็งอาหาร',
+    'การเก็บ/ถนอมอาหารด้วยเครื่องจักร',
+  ],
+  '4. กิจการเกี่ยวกับยา เวชภัณฑ์ เครื่องสำอาง': [
+    'การผลิต โม่ บด ผสม บรรจุยา',
+    'การผลิต บรรจุ ยาสีฟัน แชมพู ผ้าเย็น เครื่องสำอาง สบู่',
+    'การผลิต บรรจุ สำลี ผลิตภัณฑ์จากสำลี',
+    'การผลิต ผ้าพันแผล ผ้าปิดแผล ผ้าอนามัย ผ้าอ้อม',
+    'การผลิต ผงซักฟอก สบู่ น้ำยาทำความสะอาด',
+  ],
+  '5. กิจการที่เกี่ยวกับการเกษตร': [
+    'การผลิต/แบ่งบรรจุ น้ำมันจากพืช',
+    'การล้าง อบ รม สะสมยางดิบ',
+    'การผลิต/แบ่งบรรจุ แป้งมันสำปะหลัง แป้งสาคู แป้งจากพืช',
+    'การสีข้าว นวดข้าวด้วยเครื่องจักร',
+    'การแบ่งบรรจุข้าว',
+    'การผลิตยาสูบ',
+    'การขัด กะเทาะ บดเมล็ดพืช',
+    'การผลิต/แบ่งบรรจุ ปุ๋ย หรือวัสดุที่นำไปผลิตปุ๋ย',
+    'การผลิตเส้นใยจากพืช',
+    'การตาก สะสม ขนถ่าย ผลิตผลของมันสำปะหลัง ข้าวเปลือก อ้อย ข้าวโพด',
+  ],
+  '6. กิจการที่เกี่ยวกับโลหะหรือแร่': [
+    'การผลิตภาชนะ เครื่องประดับ เครื่องมือ ด้วยโลหะหรือแร่',
+    'การถลุงแร่ การหลอม หล่อโลหะ',
+    'การกลึง เจาะ เชื่อม ตี ตัด ประสาน รีด อัดโลหะ',
+    'การเคลือบ ชุบโลหะ ด้วยตะกั่ว สังกะสี ดีบุก โครเมียม นิกเกิล',
+    'การขัด ล้างโลหะด้วยเครื่องจักรหรือสารเคมี',
+    'การทำเหมืองแร่ สะสม แยก คัดเลือก ล้างแร่',
+  ],
+  '7. กิจการเกี่ยวกับยานยนต์ เครื่องจักร': [
+    'การต่อ ประกอบ ยานยนต์',
+    'การเคาะ ปะผุ พ่นสี พ่นสารกันสนิม ยานยนต์',
+    'การผลิตยานยนต์ เครื่องจักร เครื่องกล',
+    'การซ่อม ปรับแต่ง เครื่องยนต์ เครื่องจักร เครื่องกล',
+    'การประกอบธุรกิจยานยนต์ที่มีบริการซ่อมด้วย',
+    'การล้าง ขัดสี เคลือบสี อัดฉีดยานยนต์',
+    'การผลิตแบตเตอรี่',
+    'การสะสม จำหน่าย ซ่อม แบตเตอรี่',
+    'การอัดแบตเตอรี่',
+    'การจำหน่าย ซ่อม ปะ เชื่อมยางยานยนต์ ตั้งศูนย์ถ่วงล้อ',
+    'การผลิตผ้าเบรก ผ้าคลัตช์',
+    'การซ่อม ประกอบ อัดผ้าเบรก ผ้าคลัตช์',
+    'การสะสม ซ่อม เครื่องกล/เครื่องจักรเก่า',
+  ],
+  '8. กิจการเกี่ยวกับไม้หรือกระดาษ': [
+    'การผลิตไม้ขีดไฟ',
+    'การเลื่อย ซอย ขัด ไส เจาะ ตัดไม้ด้วยเครื่องจักร',
+    'การผลิต/พ่นสีสำเร็จ สิ่งของจากไม้ หวาย ชานอ้อย',
+    'การอบไม้',
+    'การผลิตธูป',
+    'การสะสม/แบ่งบรรจุธูป',
+    'การผลิตสิ่งของ เครื่องเขียน จากกระดาษ',
+    'การผลิตกระดาษชนิดต่างๆ',
+    'การเผาถ่าน',
+    'การสะสมถ่าน',
+  ],
+  '9. กิจการที่เกี่ยวกับการบริการ': [
+    'การประกอบกิจการสปา',
+    'การประกอบกิจการอาบ อบ นวด',
+    'การประกอบกิจการนวดเพื่อสุขภาพ',
+    'การประกอบกิจการอาบน้ำ อบไอน้ำ อบสมุนไพร',
+    'การประกอบกิจการโรงแรม สถานที่พัก',
+    'การประกอบกิจการหอพัก อาคารชุด ห้องเช่า',
+    'การประกอบกิจการโรงมหรสพ',
+    'การจัดให้มีมหรสพ ดนตรี เต้นรำ คาราโอเกะ',
+    'การประกอบกิจการสระว่ายน้ำ',
+    'การประกอบกิจการเล่นสเกต โรลเลอร์เบลด',
+    'การประกอบกิจการเสริมสวย แต่งผม',
+    'การประกอบกิจการสถานที่ออกกำลังกาย',
+    'การประกอบกิจการให้บริการควบคุมน้ำหนัก',
+    'การประกอบกิจการสวนสนุก โบว์ลิ่ง ตู้เกม',
+    'การประกอบกิจการให้บริการคอมพิวเตอร์',
+    'การประกอบกิจการสนามกอล์ฟ/ฝึกซ้อมกอล์ฟ',
+    'การประกอบกิจการห้องปฏิบัติการทางการแพทย์',
+    'การประกอบกิจการสักผิวหนัง/เจาะร่างกาย',
+    'การประกอบกิจการเลี้ยงดูแลเด็กที่บ้านของผู้รับบริการ',
+    'การประกอบกิจการดูแลผู้สูงอายุที่บ้านของผู้รับบริการ',
+    'การประกอบกิจการสปาอาบน้ำ ตัดขน เลี้ยง/ฝากสัตว์',
+  ],
+  '10. กิจการที่เกี่ยวกับสิ่งทอ': [
+    'การปั่นด้าย กรอด้าย ทอผ้าด้วยเครื่องจักร',
+    'การทอผ้าด้วยกี่กระตุก',
+    'การสะสมปอ ป่าน ฝ้าย นุ่น ใยสังเคราะห์',
+    'การปั่นฝ้าย นุ่น ใยสังเคราะห์ด้วยเครื่องจักร',
+    'การทอเสื่อ กระสอบ พรม ด้วยเครื่องจักร',
+    'การเย็บผ้าด้วยเครื่องจักร',
+    'การปักผ้าด้วยเครื่องจักร',
+    'การพิมพ์ผ้า สิ่งทอ',
+    'การซัก อบ รีด อัดกลีบผ้าด้วยเครื่องจักร',
+    'การย้อม ฟอก กัดสีผ้า',
+  ],
+  '11. กิจการเกี่ยวกับหิน ดิน ทราย ซีเมนต์': [
+    'การผลิตภาชนะ/ผลิตภัณฑ์ดินเผา',
+    'การระเบิด โม่ บด ย่อยหินด้วยเครื่องจักร',
+    'การผลิตสิ่งของจากซีเมนต์',
+    'การสะสมซีเมนต์ หิน ดิน ทราย วัสดุก่อสร้าง',
+    'การผสมซีเมนต์ หิน ดิน ทราย',
+    'การขุด ตัก ดูด โม่ บด ซีเมนต์ หิน ดิน ทราย ด้วยเครื่องจักร',
+    'การเจียระไนเพชร พลอย หิน กระจก',
+    'การเลื่อย ตัด ประดิษฐ์หินเป็นสิ่งของ',
+    'การผลิตชอล์ก ปูนปลาสเตอร์ ปูนขาว ดินสอพอง',
+    'การผลิตผลิตภัณฑ์ที่มีแร่ใยหิน',
+    'การผลิต ตัด บด กระจก/ผลิตภัณฑ์แก้ว',
+    'การผลิตกระดาษทราย ผ้าทราย',
+    'การผลิตใยแก้ว/ผลิตภัณฑ์จากใยแก้ว',
+    'การล้าง ขัด ด้วยการพ่นทรายลงบนพื้นผิว',
+  ],
+  '12. กิจการเกี่ยวกับปิโตรเลียม สารเคมี': [
+    'การผลิต บรรจุ กรด ด่าง สารออกซิไดซ์ ตัวทำละลาย',
+    'การสะสม ขนส่ง กรด ด่าง สารเคมี',
+    'การผลิต บรรจุ ก๊าซ',
+    'การสะสม ขนส่ง ก๊าซ',
+    'การผลิต กลั่น ปิโตรเลียม',
+    'การสะสมปิโตรเลียม',
+    'การขนส่งปิโตรเลียม',
+    'การผลิตถ่านหิน ถ่านโค้ก',
+    'การสะสม ขนส่ง ถ่านหิน ถ่านโค้ก',
+    'การพ่นสี (ที่ไม่ใช่ยานยนต์)',
+    'การผลิตสิ่งของจากยางเทียม พลาสติก เซลลูลอยด์',
+    'การโม่ สะสม บดชัน',
+    'การผลิตสี/น้ำมันผสมสี',
+    'การผลิตฟิล์มรูปถ่าย ฟิล์มภาพยนตร์',
+    'การล้างฟิล์มรูปถ่าย ฟิล์มภาพยนตร์',
+    'การเคลือบ ชุบวัตถุด้วยพลาสติก',
+    'การผลิตพลาสติก เซลลูลอยด์ เบเกอร์ไลท์',
+    'การผลิต/บรรจุ สารเคมีดับเพลิง',
+    'การผลิตน้ำแข็งแห้ง',
+    'การผลิตดอกไม้เพลิง',
+    'การสะสม ขนส่ง ดอกไม้เพลิง',
+    'การผลิตเชลแล็ก สารเคลือบเงา',
+    'การผลิต/บรรจุ สารกำจัดศัตรูพืช',
+    'การสะสม ขนส่ง สารกำจัดศัตรูพืช',
+    'การผลิต/บรรจุ กาว',
+  ],
+  '13. กิจการอื่นๆ': [
+    'การพิมพ์หนังสือ/สิ่งพิมพ์ด้วยเครื่องจักร',
+    'การผลิตเครื่องอิเล็กทรอนิกส์/เครื่องไฟฟ้า',
+    'การซ่อมเครื่องอิเล็กทรอนิกส์/เครื่องไฟฟ้า',
+    'การผลิตเทียน/เทียนไข',
+    'การพิมพ์แบบ พิมพ์เขียว',
+    'การถ่ายเอกสาร',
+    'การสะสมวัตถุ/สิ่งของชำรุด ใช้แล้ว เหลือใช้',
+    'การประกอบกิจการโกดังสินค้า',
+    'การล้างขวด ภาชนะ บรรจุภัณฑ์ที่ใช้แล้ว',
+    'การพิมพ์ พ่นสีลงบนวัตถุที่มิใช่สิ่งทอ',
+    'การประกอบกิจการท่าเทียบเรือประมง สะพานปลา',
+    'การบรรจุหีบห่อสินค้าโดยใช้เครื่องจักร',
+    'การให้บริการควบคุม/ป้องกัน/กำจัดแมลง สัตว์พาหะนำโรค',
+    'การผลิตสิ่งของจากยาง',
+    'การผลิต/สะสม ไบโอดีเซล/เอทานอล',
+    'การขนส่ง ไบโอดีเซล/เอทานอล',
+  ],
+  '14. กิจการเก็บ ขน กำจัดสิ่งปฏิกูล/มูลฝอย': [
+    'รับทำการเก็บและขนสิ่งปฏิกูล/มูลฝอยทั่วไป',
+    'รับทำการกำจัดสิ่งปฏิกูล/มูลฝอยทั่วไป',
+    'รับทำการเก็บและขนมูลฝอยติดเชื้อ',
+    'รับทำการกำจัดมูลฝอยติดเชื้อ',
+    'ให้บริการตั้งห้องสุขา',
+    'ให้บริการรถสุขา',
+  ],
+};
+
+// ═════════════════════════════════════
 // CONFIG — ตั้งค่าก่อนใช้งานครั้งแรก
 // ═════════════════════════════════════
 const CONFIG = {
   // URL ของ Google Apps Script Web App (ดูคู่มือติดตั้ง)
-  API_URL: 'https://script.google.com/macros/s/AKfycbwJ1Eys8EKY8zFh-PNxflchVmlam3lzMrv9UqGgahDA3W_JVWe4KL00fGjaBDXt531APw/exec',
+  API_URL: 'PASTE_YOUR_APPS_SCRIPT_URL_HERE',
 };
 
 // ═════════════════════════════════════
@@ -509,6 +749,14 @@ function initApp(){
   FYS.forEach(y=>{
     f_fy.innerHTML += `<option value="${y}" ${y===CURRENT_FY?'selected':''}>${y}</option>`;
     filterFY.innerHTML += `<option value="${y}" ${y===CURRENT_FY?'selected':''}>${y}</option>`;
+  });
+
+  // populate group dropdown
+  const f_group = document.getElementById('f_group');
+  Object.keys(BUSINESS_TYPES).forEach(g=>{
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = g;
+    f_group.appendChild(opt);
   });
 
   // attach file input handler
@@ -727,12 +975,15 @@ function resetForm(){
   attachments = [];
   document.getElementById('formTitle').textContent = 'เพิ่มข้อมูลใบอนุญาต';
   document.getElementById('formMode').textContent = 'ใหม่';
-  ['f_no','f_subtype','f_name','f_owner','f_phone','f_fee','f_issue','f_expire','f_area','f_workers','f_addr','f_note'].forEach(id=>document.getElementById(id).value='');
+  ['f_no','f_name','f_owner','f_phone','f_fee','f_issue','f_expire','f_area','f_workers','f_horsepower','f_zone','f_addr','f_subdistrict','f_note'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f_district').value = 'คันนายาว';
   document.getElementById('f_province').value = 'กรุงเทพมหานคร';
   document.getElementById('f_type').value = '';
+  document.getElementById('f_group').value = '';
+  document.getElementById('f_subtype').innerHTML = '<option value="">— เลือกประเภท —</option>';
   document.getElementById('f_status').value = 'มีผล';
   document.getElementById('f_fy').value = CURRENT_FY;
+  onTypeChange();
   renderAttList();
 }
 
@@ -743,6 +994,9 @@ function loadIntoForm(r){
   document.getElementById('formMode').textContent = 'แก้ไข';
   document.getElementById('f_fy').value = r.fy || CURRENT_FY;
   document.getElementById('f_type').value = r.licenseType || '';
+  onTypeChange();
+  document.getElementById('f_group').value = r.businessGroup || '';
+  populateSubtypes(r.businessGroup || '');
   document.getElementById('f_subtype').value = r.subtype || '';
   document.getElementById('f_no').value = r.licenseNo || '';
   document.getElementById('f_status').value = r.status || 'มีผล';
@@ -754,13 +1008,50 @@ function loadIntoForm(r){
   document.getElementById('f_expire').value = r.expireDate || '';
   document.getElementById('f_area').value = r.area || '';
   document.getElementById('f_workers').value = r.workers || '';
+  document.getElementById('f_horsepower').value = r.horsepower || '';
+  document.getElementById('f_zone').value = r.zone || '';
   document.getElementById('f_addr').value = r.address || '';
+  document.getElementById('f_subdistrict').value = r.subdistrict || '';
   document.getElementById('f_district').value = r.district || 'คันนายาว';
   document.getElementById('f_province').value = r.province || 'กรุงเทพมหานคร';
   document.getElementById('f_note').value = r.note || '';
   renderAttList();
   goPage1();
   document.querySelector('#p1 .scroll').scrollTop = 0;
+}
+
+function onTypeChange(){
+  // ถ้าเลือกประเภท "อันตรายต่อสุขภาพ (อภ.2)" หรือ "เก็บ ขน กำจัดสิ่งปฏิกูล" ให้แสดง group dropdown
+  // ประเภทอื่น (อาหาร ตลาด หนังสือรับรอง) ไม่ต้องเลือก group
+  const t = document.getElementById('f_type').value;
+  const groupRow = document.getElementById('f_group').closest('.fg-row');
+  if(t.includes('อภ.2') || t.includes('สิ่งปฏิกูล') || t.includes('มูลฝอย')){
+    groupRow.style.display = '';
+  } else {
+    groupRow.style.display = 'none';
+    document.getElementById('f_group').value = '';
+    populateSubtypes('');
+  }
+}
+
+function onGroupChange(){
+  const g = document.getElementById('f_group').value;
+  populateSubtypes(g);
+}
+
+function populateSubtypes(group){
+  const sel = document.getElementById('f_subtype');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— เลือกประเภท —</option>';
+  if(group && BUSINESS_TYPES[group]){
+    BUSINESS_TYPES[group].forEach(s=>{
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      sel.appendChild(opt);
+    });
+    // ถ้าค่าเดิมยังอยู่ในกลุ่มใหม่ ให้คงไว้
+    if(BUSINESS_TYPES[group].includes(cur)) sel.value = cur;
+  }
 }
 
 function buildRecord(){
@@ -771,6 +1062,7 @@ function buildRecord(){
   return {
     fy: parseInt(v('f_fy')),
     licenseType: v('f_type'),
+    businessGroup: v('f_group'),
     subtype: v('f_subtype'),
     licenseNo: v('f_no'),
     status: v('f_status'),
@@ -782,7 +1074,10 @@ function buildRecord(){
     expireDate: v('f_expire'),
     area: v('f_area'),
     workers: v('f_workers'),
+    horsepower: v('f_horsepower'),
+    zone: v('f_zone'),
     address: v('f_addr'),
+    subdistrict: v('f_subdistrict'),
     district: v('f_district'),
     province: v('f_province'),
     note: v('f_note'),
@@ -869,7 +1164,7 @@ function autoSt(s){
 }
 function refSt(){
   recs.forEach(r=>{
-    if(r.expireDate && r.status!=='รอดำเนินการ'){
+    if(r.expireDate && r.status!=='รอดำเนินการ' && r.status!=='ยกเลิก'){
       r.status = autoSt(r.expireDate);
     }
   });
@@ -944,7 +1239,7 @@ function renderRecs(){
 
   let f = getFilteredFY().filter(r => !r.isVersion);
   if(actSt !== 'all') f = f.filter(r => r.status === actSt);
-  if(q) f = f.filter(r=>['businessName','licenseNo','licenseType','subtype','ownerName','address','phone','note'].some(k=>(r[k]||'').includes(q)));
+  if(q) f = f.filter(r=>['businessName','licenseNo','licenseType','businessGroup','subtype','ownerName','address','subdistrict','phone','zone','note'].some(k=>(r[k]||'').includes(q)));
 
   if(mode==='expire') f=[...f].sort((a,b)=>td(a.expireDate)-td(b.expireDate));
   else if(mode==='name') f=[...f].sort((a,b)=>(a.businessName||'').localeCompare(b.businessName||'','th'));
@@ -1023,8 +1318,9 @@ function showMod(id){
   const fields = [
     ['เลขที่ใบอนุญาต', r.licenseNo, 'mono'],
     ['ปีงบประมาณ', r.fy],
-    ['ประเภท', r.licenseType, '', true],
-    ['หมวดประเภทย่อย', r.subtype, '', true],
+    ['ประเภทใบอนุญาต/หนังสือรับรอง', r.licenseType, '', true],
+    ['กลุ่มกิจการหลัก', r.businessGroup, '', true],
+    ['ประเภทการประกอบกิจการ', r.subtype, '', true],
     ['ชื่อธุรกิจ', r.businessName, '', true],
     ['ผู้รับอนุญาต', r.ownerName],
     ['เบอร์โทร', r.phone],
@@ -1034,8 +1330,11 @@ function showMod(id){
     ['สถานะ', r.status],
     ['ขนาดพื้นที่', r.area?r.area+' ตร.ม.':'-'],
     ['จำนวนคนงาน', r.workers?r.workers+' คน':'-'],
+    ['กำลังเครื่องจักร', r.horsepower?r.horsepower+' แรงม้า':'-'],
+    ['พื้นที่รับผิดชอบ', r.zone],
     ['ที่อยู่', r.address, '', true],
-    ['เขต', r.district],
+    ['แขวง/ตำบล', r.subdistrict],
+    ['เขต/อำเภอ', r.district],
     ['จังหวัด', r.province],
     ['หมายเหตุ', r.note, '', true],
   ];
@@ -1130,10 +1429,11 @@ function expCSV(){
   togMenu();
   const list = getFilteredFY().filter(r=>!r.isVersion);
   if(!list.length){ showToast('⚠️ ไม่มีข้อมูล','err'); return; }
-  const h = ['ลำดับ','ปีงบ','เลขที่','ประเภท','หมวดย่อย','ชื่อธุรกิจ','ผู้รับอนุญาต','เบอร์โทร','วันที่ออก','วันหมดอายุ','ค่าธรรมเนียม','พื้นที่(ตร.ม.)','คนงาน','สถานะ','ที่อยู่','เขต','จังหวัด','หมายเหตุ','แก้ไขโดย','แก้ไขเมื่อ'];
+  const h = ['ลำดับ','ปีงบ','เลขที่','ประเภทใบอนุญาต','กลุ่มกิจการ','ประเภทการประกอบกิจการ','ชื่อธุรกิจ','ผู้รับอนุญาต','เบอร์โทร','วันที่ออก','วันหมดอายุ','ค่าธรรมเนียม','พื้นที่(ตร.ม.)','คนงาน','แรงม้า','พื้นที่รับผิดชอบ','สถานะ','ที่อยู่','แขวง/ตำบล','เขต','จังหวัด','หมายเหตุ','แก้ไขโดย','แก้ไขเมื่อ'];
   const rows = list.map((r,i)=>[
-    i+1, r.fy, r.licenseNo, r.licenseType, r.subtype, r.businessName, r.ownerName, r.phone,
-    r.issueDate, r.expireDate, r.fee, r.area, r.workers, r.status, r.address, r.district, r.province, r.note,
+    i+1, r.fy, r.licenseNo, r.licenseType, r.businessGroup, r.subtype, r.businessName, r.ownerName, r.phone,
+    r.issueDate, r.expireDate, r.fee, r.area, r.workers, r.horsepower, r.zone, r.status,
+    r.address, r.subdistrict, r.district, r.province, r.note,
     r.updatedBy, r.updatedAt?new Date(r.updatedAt).toLocaleString('th-TH'):''
   ].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
   const csv = '\uFEFF' + [h.join(','), ...rows].join('\n');
