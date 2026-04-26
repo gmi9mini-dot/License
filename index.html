@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบใบอนุญาต · เขตคันนายาว</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--navy:#0D2D4E;--blue:#1F4E79;--mid:#2E75B6;--light:#DEEAF1;--accent:#00B4D8;--ok:#1D7A1D;--warn:#C05000;--err:#B00000;--bg:#F0F4F8;--card:#fff;--border:#CBD5E0;--text:#1A202C;--muted:#718096}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);font-size:14px;overflow:hidden}
+
+#app{width:100%;height:100dvh;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1);background:var(--bg)}
+#p1{transform:translateX(0)}
+#p2{transform:translateX(100%)}
+#app.on-p2 #p1{transform:translateX(-30%)}
+#app.on-p2 #p2{transform:translateX(0)}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#0D2D4E,#1F4E79);color:#fff;padding:11px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.25);z-index:10}
+.hico{width:34px;height:34px;background:rgba(255,255,255,.12);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.hdr h1{font-size:13.5px;font-weight:700;line-height:1.3}
+.hdr small{font-size:10.5px;opacity:.7;display:block;margin-top:1px}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.uavatar{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.3);cursor:pointer;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;overflow:hidden}
+.uavatar img{width:100%;height:100%;object-fit:cover}
+.back-btn{background:rgba(255,255,255,.15);border:none;color:#fff;width:32px;height:32px;border-radius:9px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.back-btn:active{background:rgba(255,255,255,.3)}
+.bico{width:34px;height:34px;border:none;background:rgba(255,255,255,.12);color:#fff;border-radius:9px;font-size:16px;cursor:pointer}
+
+/* ── SCROLL ── */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 12px 40px}
+.inner{max-width:680px;margin:0 auto}
+
+/* ── LOGIN GATE ── */
+#gate{position:fixed;inset:0;background:linear-gradient(135deg,#0D2D4E,#1F4E79);display:none;align-items:center;justify-content:center;z-index:500;padding:20px}
+#gate.show{display:flex}
+.gate-card{background:#fff;border-radius:18px;padding:28px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.gate-ico{font-size:48px;margin-bottom:12px}
+.gate-card h2{font-size:18px;color:#0D2D4E;margin-bottom:6px}
+.gate-card p{font-size:13px;color:var(--muted);margin-bottom:20px}
+.gate-btn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--border);color:var(--text);padding:11px 20px;border-radius:10px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.gate-btn:hover{background:#F7FAFC;border-color:#2E75B6}
+.gate-foot{margin-top:18px;padding-top:14px;border-top:1px solid #E2E8F0;font-size:11px;color:var(--muted)}
+
+/* ── PAGE 1: FORM ── */
+.tabs{display:flex;gap:6px;background:#fff;padding:5px;border-radius:12px;margin-bottom:14px;border:1px solid var(--border)}
+.tab{flex:1;padding:9px 12px;border:none;background:transparent;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:8px;transition:all .15s}
+.tab.active{background:#1F4E79;color:#fff}
+
+.goto-btn{display:flex;align-items:center;gap:11px;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:13px 14px;cursor:pointer;margin-bottom:14px;width:100%;text-align:left;transition:all .2s}
+.goto-btn:active{background:#DEEAF1;border-color:#2E75B6}
+.goto-ico{width:40px;height:40px;background:var(--light);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.goto-text{flex:1;min-width:0}
+.goto-title{font-size:13.5px;font-weight:700;color:#1F4E79}
+.goto-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.goto-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.cnt-pill{background:#1F4E79;color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.goto-arr{font-size:18px;color:#2E75B6}
+
+/* form card */
+.fcard{background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.06);margin-bottom:14px}
+.fchead{background:linear-gradient(135deg,#0D2D4E,#1F4E79);color:#fff;padding:11px 14px;display:flex;align-items:center;gap:8px}
+.fchead h3{font-size:13.5px;font-weight:700;flex:1}
+.fbod{padding:14px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fg-row{display:flex;flex-direction:column;gap:4px}
+.fg-row.full{grid-column:1/-1}
+.fg-row label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.fg-row label .req{color:#B00000;margin-left:2px}
+.fg-row input,.fg-row select,.fg-row textarea{width:100%;padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sarabun',sans-serif;font-size:13px;color:var(--text);outline:none;background:#fff;transition:all .15s}
+.fg-row input:focus,.fg-row select:focus,.fg-row textarea:focus{border-color:#2E75B6;background:#F7FBFE;box-shadow:0 0 0 3px rgba(46,117,182,.1)}
+.fg-row textarea{resize:vertical;min-height:60px}
+.fg-row select{cursor:pointer;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23718096' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;appearance:none}
+.fg-hint{font-size:10.5px;color:var(--muted)}
+
+/* attachments */
+.att-zone{border:2px dashed #2E75B6;border-radius:10px;padding:18px 12px;text-align:center;background:#F7FBFE;cursor:pointer;transition:all .2s;margin-top:6px}
+.att-zone:hover{background:#EBF5FB}
+.att-zone.drag{background:#DEEAF1;border-color:#00B4D8}
+.att-zone-ico{font-size:28px;margin-bottom:4px}
+.att-zone p{font-size:12px;color:#1F4E79;font-weight:600}
+.att-zone small{font-size:10px;color:var(--muted)}
+.att-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.att-item{display:flex;align-items:center;gap:9px;background:#F0F4F8;border:1px solid var(--border);border-radius:8px;padding:7px 10px}
+.att-item-ico{font-size:18px}
+.att-item-info{flex:1;min-width:0}
+.att-item-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att-item-size{font-size:10px;color:var(--muted)}
+.att-item-rm{background:none;border:none;color:#B00000;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:5px}
+.att-item-rm:hover{background:#FDECEA}
+
+/* save bar */
+.save-bar{display:flex;gap:8px;padding:12px;background:#FAFBFC;border-top:1px solid var(--border)}
+.btn{flex:1;padding:11px;border:none;border-radius:9px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.btn.p{background:#1F4E79;color:#fff}.btn.p:active{background:#0D2D4E}
+.btn.s{background:#DEEAF1;color:#1F4E79}.btn.s:active{background:#C5DBE9}
+.btn.danger{background:#FDECEA;color:#B00000}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* sync status */
+.sync-bar{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:14px;font-size:11.5px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0;box-shadow:0 0 0 0 rgba(29,122,29,.5);animation:pulse 2s infinite}
+.sync-dot.off{background:var(--err);animation:none}
+.sync-dot.busy{background:var(--warn);animation:pulse 1s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(29,122,29,.5)}70%{box-shadow:0 0 0 8px rgba(29,122,29,0)}100%{box-shadow:0 0 0 0 rgba(29,122,29,0)}}
+.sync-text{color:var(--muted);flex:1}
+.sync-text strong{color:var(--text)}
+.sync-refresh{background:none;border:none;color:var(--mid);cursor:pointer;font-size:14px;padding:3px}
+
+/* ── PAGE 2: RECORDS ── */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.sbox{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 5px;text-align:center;cursor:pointer;transition:all .15s}
+.sbox:active{transform:scale(.96)}
+.sbox.active{border-width:2px}
+.sbox.sa.active{border-color:#1F4E79}.sbox.sm.active{border-color:#1D7A1D}.sbox.sw.active{border-color:#C05000}.sbox.se.active{border-color:#B00000}
+.snum{font-size:18px;font-weight:800;line-height:1}
+.snum.na{color:#1F4E79}.snum.no{color:#1D7A1D}.snum.nw{color:#C05000}.snum.ne{color:#B00000}
+.slbl{font-size:9px;color:var(--muted);margin-top:2px;font-weight:700}
+
+.scrd{background:#fff;border:1px solid var(--border);border-radius:11px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px}
+.smr{display:flex;gap:7px;align-items:center}
+.swrap{flex:1;position:relative;display:flex;align-items:center}
+.sico2{position:absolute;left:10px;font-size:13px;pointer-events:none}
+.sinput{width:100%;padding:8px 32px;border:1.5px solid var(--border);border-radius:9px;font-family:'Sarabun',sans-serif;font-size:13px;background:#F0F4F8;outline:none}
+.sinput:focus{border-color:#2E75B6;background:#fff}
+.sclr{position:absolute;right:8px;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:3px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{padding:4px 10px;border-radius:20px;border:1.5px solid var(--border);background:#F0F4F8;font-family:'Sarabun',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
+.chip.active{background:#1F4E79;border-color:#1F4E79;color:#fff}
+.chip.wn.active{background:#C05000;border-color:#C05000;color:#fff}
+.chip.er.active{background:#B00000;border-color:#B00000;color:#fff}
+.fy-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ssel{padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'Sarabun',sans-serif;font-size:12px;background:#F0F4F8;color:var(--text);outline:none;cursor:pointer}
+.rcnt{font-size:11px;color:var(--muted);margin-left:auto}
+
+mark{background:#FFF176;color:#0D2D4E;border-radius:2px;padding:0 1px}
+.amenu{position:relative}
+.amenu .bico{border:1.5px solid rgba(255,255,255,.2)}
+.mdrop{display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.18);min-width:200px;overflow:hidden;z-index:60}
+.mdrop.open{display:block}
+.mdrop button{display:block;width:100%;padding:10px 14px;border:none;background:none;text-align:left;font-family:'Sarabun',sans-serif;font-size:13px;color:var(--text);cursor:pointer}
+.mdrop button:hover{background:#DEEAF1}
+.mdrop button.dx{color:#B00000;border-top:1px solid var(--border)}
+
+.rlist{display:flex;flex-direction:column;gap:8px}
+.rc2{background:#fff;border:1px solid var(--border);border-radius:11px;padding:11px 13px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;transition:all .2s;position:relative}
+.rc2:active{border-color:#2E75B6;background:#f7fbff}
+.rico{width:36px;height:36px;min-width:36px;border-radius:8px;background:#DEEAF1;display:flex;align-items:center;justify-content:center;font-size:18px}
+.rbody{flex:1;min-width:0}
+.rname{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rno{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:1px}
+.rmeta{font-size:11px;color:var(--muted);margin-top:2px}
+.rmeta-ver{font-size:10px;color:var(--mid);font-weight:700;margin-top:2px}
+.rst{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;align-self:center}
+.rs-มีผล{background:#E6F4E6;color:#1D7A1D}.rs-หมดอายุ{background:#FDECEA;color:#B00000}.rs-ใกล้หมดอายุ{background:#FEF3E2;color:#C05000}.rs-รอดำเนินการ{background:#DEEAF1;color:#2E75B6}
+.rdel{position:absolute;top:8px;right:8px;background:none;border:none;color:#CBD5E0;font-size:14px;cursor:pointer;padding:2px 4px;border-radius:5px}
+.rdel:hover{background:#FDECEA;color:#B00000}
+.empty{text-align:center;padding:48px 16px;color:var(--muted)}
+.empty-ico{font-size:44px;margin-bottom:10px}
+
+/* ── MODALS ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0D2D4E;color:#fff;padding:10px 20px;border-radius:25px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .3s;z-index:999;white-space:nowrap;max-width:90vw;text-overflow:ellipsis;overflow:hidden}
+#toast.show{opacity:1}
+#toast.err{background:#B00000}
+#toast.ok{background:#1D7A1D}
+
+#mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+#mov.open{display:flex}
+#modal{background:#fff;border-radius:18px 18px 0 0;padding:18px 14px 30px;width:100%;max-width:680px;max-height:88vh;overflow-y:auto;animation:su .28s ease}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mhead h3{font-size:14.5px;font-weight:700;color:#0D2D4E}
+.mclose{background:#DEEAF1;border:none;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;color:#1F4E79}
+
+.mflds{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mf{display:flex;flex-direction:column;gap:2px}
+.mf.full{grid-column:1/-1}
+.mf label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.mf span{font-size:13px;font-weight:500;word-break:break-word}
+.mf span.mono{font-family:'IBM Plex Mono',monospace;font-size:11px}
+.matt{margin-top:10px}
+.matt-link{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F0F4F8;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:#1F4E79;font-size:12px;font-weight:600;margin-top:5px}
+.matt-link:hover{background:#DEEAF1}
+
+/* save-mode dialog */
+#smov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;padding:18px}
+#smov.open{display:flex}
+.sm-card{background:#fff;border-radius:14px;padding:18px;max-width:420px;width:100%;animation:su .25s ease}
+.sm-card h3{font-size:15px;color:#0D2D4E;margin-bottom:6px}
+.sm-card>p{font-size:12px;color:var(--muted);margin-bottom:14px}
+.sm-opt{display:block;width:100%;text-align:left;padding:11px 13px;border:1.5px solid var(--border);background:#fff;border-radius:10px;cursor:pointer;margin-bottom:8px;transition:all .15s;font-family:'Sarabun',sans-serif}
+.sm-opt:hover{border-color:#2E75B6;background:#F7FBFE}
+.sm-opt strong{display:block;font-size:13px;color:#0D2D4E;margin-bottom:2px}
+.sm-opt small{font-size:11px;color:var(--muted)}
+.sm-opt.danger:hover{border-color:#B00000;background:#FDECEA}
+
+@media(max-width:480px){
+  .fgrid,.mflds{grid-template-columns:1fr}
+  .sgrid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN GATE ── -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-ico">🔐</div>
+    <h2>ระบบใบอนุญาต</h2>
+    <p>สำนักงานเขตคันนายาว · ฝ่ายสิ่งแวดล้อมฯ<br>กรุณาเข้าสู่ระบบเพื่อใช้งาน</p>
+    <div id="g-signin"></div>
+    <div class="gate-foot">ใช้บัญชี Google ในการเข้าสู่ระบบ<br>ทุกการเปลี่ยนแปลงจะถูกบันทึกพร้อมชื่อผู้ใช้</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+
+  <!-- ════ PAGE 1: ENTRY ════ -->
+  <div class="page" id="p1">
+    <div class="hdr">
+      <div class="hico">📋</div>
+      <div style="min-width:0;flex:1"><h1>ระบบใบอนุญาต</h1><small>เขตคันนายาว · ฝ่ายสิ่งแวดล้อมฯ</small></div>
+      <div class="hdr-right">
+        <div class="uavatar" id="uavatar" onclick="toggleUserMenu()" title="บัญชีผู้ใช้"></div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="inner">
+
+        <!-- Sync status -->
+        <div class="sync-bar">
+          <div class="sync-dot" id="syncDot"></div>
+          <div class="sync-text" id="syncText">เชื่อมต่อแล้ว</div>
+          <button class="sync-refresh" onclick="reloadAll()" title="โหลดใหม่">🔄</button>
+        </div>
+
+        <!-- Goto records -->
+        <button class="goto-btn" onclick="goPage2()">
+          <div class="goto-ico">📂</div>
+          <div class="goto-text">
+            <div class="goto-title">ดูรายการที่บันทึกแล้ว</div>
+            <div class="goto-sub">ค้นหา กรอง ดาวน์โหลดรายการทั้งหมด</div>
+          </div>
+          <div class="goto-right">
+            <span class="cnt-pill" id="cnt-pill">0</span>
+            <span class="goto-arr">›</span>
+          </div>
+        </button>
+
+        <!-- ── ENTRY FORM ── -->
+        <div class="fcard">
+          <div class="fchead">
+            <span style="font-size:18px">✏️</span>
+            <h3 id="formTitle">เพิ่มข้อมูลใบอนุญาต</h3>
+            <span id="formMode" style="font-size:10px;background:rgba(255,255,255,.2);padding:3px 8px;border-radius:20px;font-weight:700">ใหม่</span>
+          </div>
+          <div class="fbod">
+            <div class="fgrid">
+
+              <div class="fg-row">
+                <label>ปีงบประมาณ <span class="req">*</span></label>
+                <select id="f_fy"></select>
+              </div>
+
+              <div class="fg-row">
+                <label>ประเภทใบอนุญาต <span class="req">*</span></label>
+                <select id="f_type">
+                  <option value="">— เลือก —</option>
+                  <option value="กิจการที่เป็นอันตรายต่อสุขภาพ (อภ.2)">กิจการที่เป็นอันตรายต่อสุขภาพ (อภ.2)</option>
+                  <option value="จำหน่ายอาหาร / สถานที่จำหน่ายอาหาร (สอ.4)">จำหน่ายอาหาร / สถานที่จำหน่ายอาหาร (สอ.4)</option>
+                  <option value="สะสมอาหาร (สอ.5)">สะสมอาหาร (สอ.5)</option>
+                  <option value="ตลาด / ที่จำหน่ายสินค้าในที่/ทางสาธารณะ">ตลาด / ที่จำหน่ายสินค้าในที่/ทางสาธารณะ</option>
+                </select>
+              </div>
+
+              <div class="fg-row full">
+                <label>หมวดประเภทย่อย</label>
+                <input id="f_subtype" type="text" placeholder="เช่น ร้านอาหารตามสั่ง, ร้านขายของชำ, โรงงานเย็บผ้า">
+              </div>
+
+              <div class="fg-row">
+                <label>เลขที่ใบอนุญาต <span class="req">*</span></label>
+                <input id="f_no" type="text" placeholder="เช่น 123/2569">
+              </div>
+
+              <div class="fg-row">
+                <label>สถานะ</label>
+                <select id="f_status">
+                  <option value="มีผล">มีผล</option>
+                  <option value="ใกล้หมดอายุ">ใกล้หมดอายุ</option>
+                  <option value="หมดอายุ">หมดอายุ</option>
+                  <option value="รอดำเนินการ">รอดำเนินการ</option>
+                </select>
+              </div>
+
+              <div class="fg-row full">
+                <label>ชื่อธุรกิจ / สถานประกอบการ <span class="req">*</span></label>
+                <input id="f_name" type="text" placeholder="ชื่อร้าน / สถานประกอบการ">
+              </div>
+
+              <div class="fg-row full">
+                <label>ผู้รับอนุญาต / เจ้าของ</label>
+                <input id="f_owner" type="text" placeholder="ชื่อ-นามสกุล">
+              </div>
+
+              <div class="fg-row">
+                <label>เบอร์โทร</label>
+                <input id="f_phone" type="tel" placeholder="0X-XXXX-XXXX" inputmode="tel">
+              </div>
+
+              <div class="fg-row">
+                <label>ค่าธรรมเนียม (บาท)</label>
+                <input id="f_fee" type="text" placeholder="0" inputmode="decimal">
+              </div>
+
+              <div class="fg-row">
+                <label>วันที่ออก</label>
+                <input id="f_issue" type="text" placeholder="วว/ดด/ปปปป" inputmode="numeric">
+              </div>
+
+              <div class="fg-row">
+                <label>วันหมดอายุ</label>
+                <input id="f_expire" type="text" placeholder="วว/ดด/ปปปป" inputmode="numeric">
+              </div>
+
+              <div class="fg-row">
+                <label>ขนาดพื้นที่ (ตร.ม.)</label>
+                <input id="f_area" type="text" placeholder="0" inputmode="decimal">
+              </div>
+
+              <div class="fg-row">
+                <label>จำนวนคนงาน</label>
+                <input id="f_workers" type="text" placeholder="0" inputmode="numeric">
+              </div>
+
+              <div class="fg-row full">
+                <label>ที่อยู่ / สถานที่ประกอบการ</label>
+                <input id="f_addr" type="text" placeholder="บ้านเลขที่ ซอย ถนน">
+              </div>
+
+              <div class="fg-row">
+                <label>เขต / อำเภอ</label>
+                <input id="f_district" type="text" value="คันนายาว">
+              </div>
+
+              <div class="fg-row">
+                <label>จังหวัด</label>
+                <input id="f_province" type="text" value="กรุงเทพมหานคร">
+              </div>
+
+              <div class="fg-row full">
+                <label>หมายเหตุ</label>
+                <textarea id="f_note" rows="2" placeholder="ข้อมูลเพิ่มเติม"></textarea>
+              </div>
+
+              <!-- Attachments -->
+              <div class="fg-row full">
+                <label>ไฟล์แนบ (PDF / รูปภาพ)</label>
+                <input type="file" id="f_files" multiple accept=".pdf,image/*" style="display:none">
+                <div class="att-zone" id="attZone" onclick="document.getElementById('f_files').click()">
+                  <div class="att-zone-ico">📎</div>
+                  <p>กดเพื่อแนบไฟล์</p>
+                  <small>รองรับ PDF, JPG, PNG · ขนาดไม่เกิน 10MB ต่อไฟล์</small>
+                </div>
+                <div class="att-list" id="attList"></div>
+              </div>
+
+            </div>
+          </div>
+          <div class="save-bar">
+            <button class="btn s" onclick="resetForm()">✕ ล้างฟอร์ม</button>
+            <button class="btn p" id="saveBtn" onclick="saveRec()">💾 บันทึก</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PAGE 2: RECORDS ════ -->
+  <div class="page" id="p2">
+    <div class="hdr">
+      <button class="back-btn" onclick="goPage1()">‹</button>
+      <div style="flex:1;min-width:0"><h1>รายการที่บันทึกแล้ว</h1><small id="p2sub">ทั้งหมด 0 รายการ</small></div>
+      <div class="hdr-right">
+        <div class="amenu">
+          <button class="bico" onclick="togMenu()">⋮</button>
+          <div class="mdrop" id="mdrop">
+            <button onclick="expCSV()">⬇️ ดาวน์โหลด CSV</button>
+            <button onclick="expJSON()">📦 ดาวน์โหลด JSON</button>
+            <button onclick="reloadAll()">🔄 โหลดข้อมูลใหม่</button>
+            <button class="dx" onclick="delAll()">🗑️ ลบทั้งหมด (เฉพาะปีนี้)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="inner">
+
+        <div class="sgrid" id="sg"></div>
+
+        <div class="scrd">
+          <div class="smr">
+            <div class="swrap">
+              <span class="sico2">🔍</span>
+              <input class="sinput" id="srch" type="text" placeholder="ค้นหาชื่อ เลขที่ ผู้รับอนุญาต...">
+              <button class="sclr" id="sclrbtn" onclick="clrSrch()" style="display:none">✕</button>
+            </div>
+          </div>
+          <div class="fy-bar">
+            <span style="font-size:11px;color:var(--muted);font-weight:700">ปีงบ:</span>
+            <select class="ssel" id="filterFY" onchange="renderRecs()"></select>
+            <span style="font-size:11px;color:var(--muted);font-weight:700;margin-left:6px">เรียง:</span>
+            <select class="ssel" id="ssel" onchange="renderRecs()">
+              <option value="newest">ล่าสุด</option>
+              <option value="expire">หมดอายุใกล้→ไกล</option>
+              <option value="name">ชื่อ ก→ฮ</option>
+            </select>
+          </div>
+          <div class="chips" id="chips">
+            <button class="chip active" data-s="all" onclick="setF(this)">ทั้งหมด</button>
+            <button class="chip" data-s="มีผล" onclick="setF(this)">✅ มีผล</button>
+            <button class="chip wn" data-s="ใกล้หมดอายุ" onclick="setF(this)">⚠️ ใกล้หมด</button>
+            <button class="chip er" data-s="หมดอายุ" onclick="setF(this)">❌ หมดอายุ</button>
+          </div>
+          <div style="display:flex"><span class="rcnt" id="rcnt3"></span></div>
+        </div>
+
+        <div class="rlist" id="rlist"></div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<div id="toast"></div>
+
+<!-- Detail Modal -->
+<div id="mov" onclick="clsMod(event)">
+  <div id="modal">
+    <div class="mhead"><h3>รายละเอียดใบอนุญาต</h3><button class="mclose" onclick="clsMod()">✕</button></div>
+    <div id="mbody"></div>
+  </div>
+</div>
+
+<!-- Save-mode dialog -->
+<div id="smov" onclick="clsSmov(event)">
+  <div class="sm-card">
+    <h3>พบเลขใบอนุญาตซ้ำในระบบ</h3>
+    <p id="smDesc">เลขที่ <strong id="smNo"></strong> มีอยู่แล้ว — เลือกการบันทึก:</p>
+    <button class="sm-opt" onclick="confirmSave('overwrite')">
+      <strong>🔄 ทับข้อมูลเก่า</strong>
+      <small>แทนที่ข้อมูลเดิม (ไม่เก็บประวัติ)</small>
+    </button>
+    <button class="sm-opt" onclick="confirmSave('version')">
+      <strong>📚 เก็บประวัติเป็นเวอร์ชัน</strong>
+      <small>ข้อมูลใหม่กลายเป็นเวอร์ชันล่าสุด ดูย้อนหลังได้</small>
+    </button>
+    <button class="sm-opt" onclick="confirmSave('new')">
+      <strong>➕ สร้างใหม่ (เลขซ้ำได้)</strong>
+      <small>เก็บเป็นรายการใหม่แยก ไม่ทับของเดิม</small>
+    </button>
+    <button class="sm-opt danger" onclick="clsSmov()" style="margin-top:6px">
+      <strong>✕ ยกเลิก</strong>
+    </button>
+  </div>
+</div>
+
+<script>
+// ═════════════════════════════════════
+// CONFIG — ตั้งค่าก่อนใช้งานครั้งแรก
+// ═════════════════════════════════════
+const CONFIG = {
+  // 1) URL ของ Google Apps Script Web App (ดูคู่มือติดตั้ง)
+  API_URL: 'https://script.google.com/macros/s/AKfy.../exec',
+
+  // 2) Google OAuth Client ID (สร้างใน Google Cloud Console)
+  GOOGLE_CLIENT_ID: 'http://1048324220982-s4bf5nvtsdm9fbf04dp90ai8godjens8.apps.googleusercontent.com',
+
+  // 3) อีเมลที่อนุญาตให้ใช้งาน (ว่าง = ทุกคนที่มี Google Account ใช้ได้)
+  ALLOWED_EMAILS: [
+   ],
+};
+
+// ═════════════════════════════════════
+// STATE
+// ═════════════════════════════════════
+let recs = [];
+let actSt = 'all';
+let currentUser = null;     // {email, name, picture}
+let editingId = null;       // id ของรายการที่กำลังแก้ (null = สร้างใหม่)
+let pendingSaveData = null; // เก็บข้อมูลรอ confirm save mode
+let attachments = [];       // ไฟล์แนบในฟอร์ม [{name,size,type,dataUrl}]
+let isLoading = false;
+
+// ปีงบ 2566–2570
+const FYS = [2566, 2567, 2568, 2569, 2570];
+const CURRENT_FY = 2569;
+
+// ═════════════════════════════════════
+// INIT
+// ═════════════════════════════════════
+window.addEventListener('load', initApp);
+
+function initApp(){
+  // populate FY selectors
+  const f_fy = document.getElementById('f_fy');
+  const filterFY = document.getElementById('filterFY');
+  filterFY.innerHTML = '<option value="all">ทุกปี</option>';
+  FYS.forEach(y=>{
+    f_fy.innerHTML += `<option value="${y}" ${y===CURRENT_FY?'selected':''}>${y}</option>`;
+    filterFY.innerHTML += `<option value="${y}" ${y===CURRENT_FY?'selected':''}>${y}</option>`;
+  });
+
+  // attach file input handler
+  document.getElementById('f_files').onchange = handleFiles;
+  const dz = document.getElementById('attZone');
+  dz.ondragover = e=>{e.preventDefault();dz.classList.add('drag');};
+  dz.ondragleave = ()=>dz.classList.remove('drag');
+  dz.ondrop = e=>{e.preventDefault();dz.classList.remove('drag');handleFiles({target:{files:e.dataTransfer.files}});};
+
+  // search handler
+  document.getElementById('srch').oninput = function(){
+    document.getElementById('sclrbtn').style.display = this.value?'block':'none';
+    renderRecs();
+  };
+
+  // close menus on outside click
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('.amenu')) document.getElementById('mdrop')?.classList.remove('open');
+  });
+
+  // try restore session
+  const saved = localStorage.getItem('lic_user');
+  if(saved){
+    try{
+      currentUser = JSON.parse(saved);
+      onLoginSuccess();
+    }catch{ showLoginGate(); }
+  } else {
+    showLoginGate();
+  }
+}
+
+// ═════════════════════════════════════
+// AUTH (Google Sign-In)
+// ═════════════════════════════════════
+function showLoginGate(){
+  document.getElementById('gate').classList.add('show');
+  document.getElementById('app').style.display = 'none';
+
+  // wait for Google library
+  const tryRender = () => {
+    if(window.google && window.google.accounts){
+      google.accounts.id.initialize({
+        client_id: CONFIG.GOOGLE_CLIENT_ID,
+        callback: handleGoogleLogin,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('g-signin'),
+        { theme:'outline', size:'large', text:'signin_with', locale:'th' }
+      );
+    } else {
+      setTimeout(tryRender, 200);
+    }
+  };
+  tryRender();
+}
+
+function handleGoogleLogin(response){
+  // decode JWT payload (no verification on client — server should verify)
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  const user = {
+    email: payload.email,
+    name: payload.name,
+    picture: payload.picture,
+    token: response.credential,
+  };
+
+  // check allowed list
+  if(CONFIG.ALLOWED_EMAILS.length > 0 && !CONFIG.ALLOWED_EMAILS.includes(user.email)){
+    showToast('❌ บัญชี '+user.email+' ไม่ได้รับอนุญาต', 'err');
+    return;
+  }
+
+  currentUser = user;
+  localStorage.setItem('lic_user', JSON.stringify(user));
+  onLoginSuccess();
+}
+
+function onLoginSuccess(){
+  document.getElementById('gate').classList.remove('show');
+  document.getElementById('app').style.display = 'block';
+
+  // set avatar
+  const av = document.getElementById('uavatar');
+  if(currentUser.picture){
+    av.innerHTML = `<img src="${currentUser.picture}" alt="">`;
+  } else {
+    av.textContent = (currentUser.name||currentUser.email||'?').charAt(0).toUpperCase();
+  }
+
+  // load data
+  reloadAll();
+}
+
+function logout(){
+  localStorage.removeItem('lic_user');
+  currentUser = null;
+  recs = [];
+  location.reload();
+}
+
+function toggleUserMenu(){
+  const name = currentUser?.name || currentUser?.email || '';
+  if(confirm(`เข้าใช้งานในชื่อ: ${name}\n\nต้องการออกจากระบบหรือไม่?`)){
+    logout();
+  }
+}
+
+// ═════════════════════════════════════
+// API CALLS (Apps Script)
+// ═════════════════════════════════════
+async function apiCall(action, payload={}){
+  if(CONFIG.API_URL.startsWith('PASTE_')){
+    throw new Error('ยังไม่ได้ตั้งค่า API_URL — โปรดดูคู่มือติดตั้ง');
+  }
+  setSync('busy', 'กำลังซิงค์...');
+  try{
+    const body = JSON.stringify({
+      action,
+      user: currentUser ? {email:currentUser.email, name:currentUser.name, token:currentUser.token} : null,
+      payload,
+    });
+    const res = await fetch(CONFIG.API_URL, {
+      method: 'POST',
+      // Apps Script Web App needs text/plain to avoid preflight
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body,
+    });
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || 'API error');
+    setSync('on', 'เชื่อมต่อแล้ว');
+    return data.result;
+  }catch(err){
+    setSync('off', 'ขาดการเชื่อมต่อ');
+    throw err;
+  }
+}
+
+function setSync(state, text){
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncText');
+  dot.className = 'sync-dot' + (state==='off'?' off':state==='busy'?' busy':'');
+  txt.innerHTML = `<strong>${text}</strong>`;
+}
+
+// ═════════════════════════════════════
+// LOAD / SAVE DATA
+// ═════════════════════════════════════
+async function reloadAll(){
+  if(isLoading) return;
+  isLoading = true;
+  try{
+    recs = await apiCall('list', {});
+    refSt();
+    updatePill();
+    renderRecs();
+    showToast('✅ โหลดข้อมูลสำเร็จ ('+recs.length+' รายการ)', 'ok');
+  }catch(err){
+    showToast('❌ '+err.message, 'err');
+    // fall back to local cache if available
+    try{
+      const cached = localStorage.getItem('lic_cache');
+      if(cached){
+        recs = JSON.parse(cached);
+        renderRecs();
+        showToast('📴 ใช้ข้อมูลออฟไลน์ '+recs.length+' รายการ', 'err');
+      }
+    }catch{}
+  }
+  isLoading = false;
+}
+
+function cacheLocal(){
+  try{ localStorage.setItem('lic_cache', JSON.stringify(recs)); }catch{}
+}
+
+// ═════════════════════════════════════
+// FORM
+// ═════════════════════════════════════
+function handleFiles(e){
+  const files = Array.from(e.target.files || []);
+  files.forEach(f=>{
+    if(f.size > 10*1024*1024){
+      showToast('⚠️ '+f.name+' เกิน 10MB', 'err');
+      return;
+    }
+    const rd = new FileReader();
+    rd.onload = ev=>{
+      attachments.push({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        dataUrl: ev.target.result,
+        isNew: true,
+      });
+      renderAttList();
+    };
+    rd.readAsDataURL(f);
+  });
+  document.getElementById('f_files').value = '';
+}
+
+function renderAttList(){
+  const list = document.getElementById('attList');
+  if(!attachments.length){ list.innerHTML=''; return; }
+  list.innerHTML = attachments.map((a,i)=>{
+    const ico = a.type?.includes('pdf') ? '📄' : '🖼️';
+    const sizeKB = Math.round((a.size||0)/1024);
+    const status = a.isNew ? '· ใหม่' : (a.url ? '· บนคลาวด์' : '');
+    return `<div class="att-item">
+      <span class="att-item-ico">${ico}</span>
+      <div class="att-item-info">
+        <div class="att-item-name">${a.name}</div>
+        <div class="att-item-size">${sizeKB} KB ${status}</div>
+      </div>
+      <button class="att-item-rm" onclick="removeAtt(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function removeAtt(i){
+  attachments.splice(i,1);
+  renderAttList();
+}
+
+function resetForm(){
+  editingId = null;
+  attachments = [];
+  document.getElementById('formTitle').textContent = 'เพิ่มข้อมูลใบอนุญาต';
+  document.getElementById('formMode').textContent = 'ใหม่';
+  ['f_no','f_subtype','f_name','f_owner','f_phone','f_fee','f_issue','f_expire','f_area','f_workers','f_addr','f_note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_district').value = 'คันนายาว';
+  document.getElementById('f_province').value = 'กรุงเทพมหานคร';
+  document.getElementById('f_type').value = '';
+  document.getElementById('f_status').value = 'มีผล';
+  document.getElementById('f_fy').value = CURRENT_FY;
+  renderAttList();
+}
+
+function loadIntoForm(r){
+  editingId = r.id;
+  attachments = (r.attachments||[]).map(a=>({...a, isNew:false}));
+  document.getElementById('formTitle').textContent = 'แก้ไขข้อมูล';
+  document.getElementById('formMode').textContent = 'แก้ไข';
+  document.getElementById('f_fy').value = r.fy || CURRENT_FY;
+  document.getElementById('f_type').value = r.licenseType || '';
+  document.getElementById('f_subtype').value = r.subtype || '';
+  document.getElementById('f_no').value = r.licenseNo || '';
+  document.getElementById('f_status').value = r.status || 'มีผล';
+  document.getElementById('f_name').value = r.businessName || '';
+  document.getElementById('f_owner').value = r.ownerName || '';
+  document.getElementById('f_phone').value = r.phone || '';
+  document.getElementById('f_fee').value = r.fee || '';
+  document.getElementById('f_issue').value = r.issueDate || '';
+  document.getElementById('f_expire').value = r.expireDate || '';
+  document.getElementById('f_area').value = r.area || '';
+  document.getElementById('f_workers').value = r.workers || '';
+  document.getElementById('f_addr').value = r.address || '';
+  document.getElementById('f_district').value = r.district || 'คันนายาว';
+  document.getElementById('f_province').value = r.province || 'กรุงเทพมหานคร';
+  document.getElementById('f_note').value = r.note || '';
+  renderAttList();
+  goPage1();
+  document.querySelector('#p1 .scroll').scrollTop = 0;
+}
+
+function buildRecord(){
+  const v = id => document.getElementById(id).value.trim();
+  if(!v('f_type')){ showToast('⚠️ กรุณาเลือกประเภทใบอนุญาต','err'); return null; }
+  if(!v('f_no')){ showToast('⚠️ กรุณากรอกเลขที่ใบอนุญาต','err'); return null; }
+  if(!v('f_name')){ showToast('⚠️ กรุณากรอกชื่อธุรกิจ','err'); return null; }
+  return {
+    fy: parseInt(v('f_fy')),
+    licenseType: v('f_type'),
+    subtype: v('f_subtype'),
+    licenseNo: v('f_no'),
+    status: v('f_status'),
+    businessName: v('f_name'),
+    ownerName: v('f_owner'),
+    phone: v('f_phone'),
+    fee: v('f_fee'),
+    issueDate: v('f_issue'),
+    expireDate: v('f_expire'),
+    area: v('f_area'),
+    workers: v('f_workers'),
+    address: v('f_addr'),
+    district: v('f_district'),
+    province: v('f_province'),
+    note: v('f_note'),
+    attachments: attachments,
+  };
+}
+
+async function saveRec(){
+  const data = buildRecord();
+  if(!data) return;
+
+  // กำลังแก้ไข — บันทึกทับเลย ไม่ต้องถาม
+  if(editingId){
+    return doSave(data, 'edit');
+  }
+
+  // ตรวจว่ามีเลขซ้ำในปีงบเดียวกันไหม
+  const dup = recs.find(r =>
+    r.licenseNo === data.licenseNo &&
+    r.fy === data.fy &&
+    !r.isVersion // ไม่นับเวอร์ชันย่อย
+  );
+
+  if(dup){
+    pendingSaveData = data;
+    document.getElementById('smNo').textContent = data.licenseNo;
+    document.getElementById('smov').classList.add('open');
+  } else {
+    doSave(data, 'new');
+  }
+}
+
+async function confirmSave(mode){
+  document.getElementById('smov').classList.remove('open');
+  if(!pendingSaveData) return;
+  const data = pendingSaveData;
+  pendingSaveData = null;
+  await doSave(data, mode);
+}
+
+async function doSave(data, mode){
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังบันทึก...';
+  try{
+    const result = await apiCall('save', {
+      mode,
+      editingId,
+      data,
+    });
+    // refresh from server
+    recs = result.records;
+    cacheLocal();
+    refSt();
+    updatePill();
+    renderRecs();
+    showToast('✅ '+result.message, 'ok');
+    resetForm();
+    setTimeout(()=>goPage2(), 400);
+  }catch(err){
+    showToast('❌ '+err.message, 'err');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '💾 บันทึก';
+}
+
+function clsSmov(e){
+  if(!e || e.target === document.getElementById('smov')){
+    document.getElementById('smov').classList.remove('open');
+    pendingSaveData = null;
+  }
+}
+
+// ═════════════════════════════════════
+// STATUS HELPER
+// ═════════════════════════════════════
+function autoSt(s){
+  if(!s) return 'มีผล';
+  const p = s.split('/');
+  if(p.length<3) return 'มีผล';
+  const exp = new Date(parseInt(p[2])-543, parseInt(p[1])-1, parseInt(p[0]));
+  const d = (exp - new Date())/86400000;
+  return d<0 ? 'หมดอายุ' : d<90 ? 'ใกล้หมดอายุ' : 'มีผล';
+}
+function refSt(){
+  recs.forEach(r=>{
+    if(r.expireDate && r.status!=='รอดำเนินการ'){
+      r.status = autoSt(r.expireDate);
+    }
+  });
+}
+
+// ═════════════════════════════════════
+// PAGE 2 RENDER
+// ═════════════════════════════════════
+function goPage2(){
+  document.getElementById('app').classList.add('on-p2');
+  renderRecs();
+}
+function goPage1(){ document.getElementById('app').classList.remove('on-p2'); }
+
+function updatePill(){
+  document.getElementById('cnt-pill').textContent = recs.filter(r=>!r.isVersion).length;
+  document.getElementById('p2sub').textContent = 'ทั้งหมด ' + recs.filter(r=>!r.isVersion).length + ' รายการ';
+}
+
+function getFilteredFY(){
+  const fy = document.getElementById('filterFY').value;
+  if(fy === 'all') return recs;
+  return recs.filter(r => String(r.fy) === fy);
+}
+
+function renderStats(){
+  const list = getFilteredFY().filter(r=>!r.isVersion);
+  const c = {
+    all: list.length,
+    'มีผล': list.filter(r=>r.status==='มีผล').length,
+    'ใกล้หมดอายุ': list.filter(r=>r.status==='ใกล้หมดอายุ').length,
+    'หมดอายุ': list.filter(r=>r.status==='หมดอายุ').length,
+  };
+  document.getElementById('sg').innerHTML = `
+    <div class="sbox sa ${actSt==='all'?'active':''}" onclick="setSF('all')"><div class="snum na">${c.all}</div><div class="slbl">ทั้งหมด</div></div>
+    <div class="sbox sm ${actSt==='มีผล'?'active':''}" onclick="setSF('มีผล')"><div class="snum no">${c['มีผล']}</div><div class="slbl">มีผล</div></div>
+    <div class="sbox sw ${actSt==='ใกล้หมดอายุ'?'active':''}" onclick="setSF('ใกล้หมดอายุ')"><div class="snum nw">${c['ใกล้หมดอายุ']}</div><div class="slbl">ใกล้หมดอายุ</div></div>
+    <div class="sbox se ${actSt==='หมดอายุ'?'active':''}" onclick="setSF('หมดอายุ')"><div class="snum ne">${c['หมดอายุ']}</div><div class="slbl">หมดอายุ</div></div>`;
+}
+function setSF(s){
+  actSt=s;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.s===s));
+  renderRecs();
+}
+function setF(btn){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  actSt=btn.dataset.s;
+  renderRecs();
+}
+
+function hl(t,q){
+  if(!q||!t) return t||'';
+  return String(t).replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi'),'<mark>$1</mark>');
+}
+function td(s){
+  if(!s) return new Date(9999,0,1);
+  const p = String(s).split('/');
+  return p.length<3 ? new Date(9999,0,1) : new Date(parseInt(p[2])-543, parseInt(p[1])-1, parseInt(p[0]));
+}
+const ico = {'อันตราย':'⚠️','จำหน่ายอาหาร':'🍽️','สะสมอาหาร':'🏪','ตลาด':'🛒'};
+function gi(t){
+  for(const [k,v] of Object.entries(ico)) if((t||'').includes(k)) return v;
+  return '📄';
+}
+
+function renderRecs(){
+  renderStats();
+  const list = document.getElementById('rlist');
+  const q = (document.getElementById('srch').value||'').trim();
+  const mode = document.getElementById('ssel').value;
+
+  let f = getFilteredFY().filter(r => !r.isVersion);
+  if(actSt !== 'all') f = f.filter(r => r.status === actSt);
+  if(q) f = f.filter(r=>['businessName','licenseNo','licenseType','subtype','ownerName','address','phone','note'].some(k=>(r[k]||'').includes(q)));
+
+  if(mode==='expire') f=[...f].sort((a,b)=>td(a.expireDate)-td(b.expireDate));
+  else if(mode==='name') f=[...f].sort((a,b)=>(a.businessName||'').localeCompare(b.businessName||'','th'));
+  else f=[...f].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+
+  document.getElementById('rcnt3').textContent = (q||actSt!=='all')?`พบ ${f.length} รายการ`:`รวม ${f.length} รายการ`;
+
+  if(!f.length){
+    list.innerHTML = `<div class="empty"><div class="empty-ico">${q?'🔍':'📭'}</div><p>${q?`ไม่พบ "${q}"`:'ยังไม่มีรายการ'}</p></div>`;
+    return;
+  }
+
+  list.innerHTML = f.map(r=>{
+    const versionCount = recs.filter(x=>x.parentId===r.id && x.isVersion).length;
+    return `<div class="rc2" onclick="showMod('${r.id}')">
+      <div class="rico">${gi(r.licenseType)}</div>
+      <div class="rbody">
+        <div class="rname">${hl(r.businessName||'(ไม่ระบุ)',q)}</div>
+        <div class="rno">${hl(r.licenseNo||'-',q)} · ปีงบ ${r.fy||'-'}</div>
+        <div class="rmeta">${hl(r.ownerName||'',q)} · หมดอายุ ${r.expireDate||'-'}</div>
+        ${versionCount?`<div class="rmeta-ver">📚 มี ${versionCount} เวอร์ชันก่อนหน้า</div>`:''}
+      </div>
+      <span class="rst rs-${r.status}">${r.status}</span>
+      <button class="rdel" onclick="delRec(event,'${r.id}')">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function clrSrch(){
+  document.getElementById('srch').value='';
+  document.getElementById('sclrbtn').style.display='none';
+  renderRecs();
+}
+
+async function delRec(e,id){
+  e.stopPropagation();
+  const r = recs.find(x=>x.id===id);
+  if(!r) return;
+  if(!confirm(`ลบรายการ "${r.businessName}"?\n(จะลบเวอร์ชันก่อนหน้าทั้งหมดด้วย)`)) return;
+  try{
+    const result = await apiCall('delete', {id});
+    recs = result.records;
+    cacheLocal();
+    updatePill();
+    renderRecs();
+    showToast('🗑️ ลบแล้ว','ok');
+  }catch(err){
+    showToast('❌ '+err.message,'err');
+  }
+}
+
+async function delAll(){
+  togMenu();
+  const fy = document.getElementById('filterFY').value;
+  const target = fy==='all' ? recs : recs.filter(r=>String(r.fy)===fy);
+  if(!target.length){ showToast('⚠️ ไม่มีข้อมูล','err'); return; }
+  if(!confirm(`ลบทั้งหมด ${target.length} รายการ${fy==='all'?'':' ในปีงบ '+fy}?`)) return;
+  try{
+    const result = await apiCall('deleteMany', {fy: fy==='all' ? null : parseInt(fy)});
+    recs = result.records;
+    cacheLocal();
+    updatePill();
+    renderRecs();
+    showToast('🗑️ ลบทั้งหมดแล้ว','ok');
+  }catch(err){ showToast('❌ '+err.message,'err'); }
+}
+
+// ═════════════════════════════════════
+// DETAIL MODAL
+// ═════════════════════════════════════
+function showMod(id){
+  const r = recs.find(x=>x.id===id);
+  if(!r) return;
+  const versions = recs.filter(x=>x.parentId===id && x.isVersion).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+
+  const fields = [
+    ['เลขที่ใบอนุญาต', r.licenseNo, 'mono'],
+    ['ปีงบประมาณ', r.fy],
+    ['ประเภท', r.licenseType, '', true],
+    ['หมวดประเภทย่อย', r.subtype, '', true],
+    ['ชื่อธุรกิจ', r.businessName, '', true],
+    ['ผู้รับอนุญาต', r.ownerName],
+    ['เบอร์โทร', r.phone],
+    ['วันที่ออก', r.issueDate],
+    ['วันหมดอายุ', r.expireDate],
+    ['ค่าธรรมเนียม', r.fee?r.fee+' บาท':'-'],
+    ['สถานะ', r.status],
+    ['ขนาดพื้นที่', r.area?r.area+' ตร.ม.':'-'],
+    ['จำนวนคนงาน', r.workers?r.workers+' คน':'-'],
+    ['ที่อยู่', r.address, '', true],
+    ['เขต', r.district],
+    ['จังหวัด', r.province],
+    ['หมายเหตุ', r.note, '', true],
+  ];
+
+  let h = `<div class="mflds">`;
+  h += fields.map(([l,v,c,full])=>`<div class="mf ${full?'full':''}"><label>${l}</label><span class="${c||''}">${v||'-'}</span></div>`).join('');
+  h += `</div>`;
+
+  // attachments
+  if(r.attachments && r.attachments.length){
+    h += `<div class="matt"><label style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">ไฟล์แนบ</label>`;
+    h += r.attachments.map(a=>{
+      const i = a.type?.includes('pdf')?'📄':'🖼️';
+      return a.url
+        ? `<a href="${a.url}" target="_blank" class="matt-link">${i} ${a.name} ↗</a>`
+        : `<div class="matt-link">${i} ${a.name}</div>`;
+    }).join('');
+    h += `</div>`;
+  }
+
+  // metadata
+  const updatedBy = r.updatedBy || '-';
+  const updatedAt = r.updatedAt ? new Date(r.updatedAt).toLocaleString('th-TH') : '-';
+  h += `<div class="matt" style="border-top:1px solid var(--border);padding-top:10px;margin-top:14px">
+    <div style="font-size:11px;color:var(--muted)">แก้ไขล่าสุดโดย <strong>${updatedBy}</strong> · ${updatedAt}</div>
+  </div>`;
+
+  // version history
+  if(versions.length){
+    h += `<div class="matt"><label style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">ประวัติเวอร์ชัน (${versions.length})</label>`;
+    h += versions.map(v=>{
+      const t = v.updatedAt ? new Date(v.updatedAt).toLocaleString('th-TH') : '-';
+      return `<div style="background:#F0F4F8;padding:8px 10px;border-radius:8px;margin-top:6px;font-size:11px">
+        <div><strong>${v.businessName||'-'}</strong> · ${v.expireDate||'-'}</div>
+        <div style="color:var(--muted);margin-top:2px">โดย ${v.updatedBy||'-'} · ${t}</div>
+      </div>`;
+    }).join('');
+    h += `</div>`;
+  }
+
+  // actions
+  h += `<div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn s" onclick="clsMod();loadIntoForm(recs.find(x=>x.id==='${id}'))">✏️ แก้ไข</button>
+    <button class="btn p" onclick="clsMod()">ปิด</button>
+  </div>`;
+
+  document.getElementById('mbody').innerHTML = h;
+  document.getElementById('mov').classList.add('open');
+}
+
+function clsMod(e){
+  if(!e || e.target === document.getElementById('mov')){
+    document.getElementById('mov').classList.remove('open');
+  }
+}
+
+// ═════════════════════════════════════
+// EXPORT
+// ═════════════════════════════════════
+function togMenu(){ document.getElementById('mdrop').classList.toggle('open'); }
+
+function fmtDate(){
+  const d=new Date();
+  return d.getFullYear()+''+String(d.getMonth()+1).padStart(2,'0')+''+String(d.getDate()).padStart(2,'0');
+}
+function isSafariIOS(){
+  return /iP(ad|hone|od)/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
+}
+function dlFile(content, mime, filename){
+  const blob = new Blob([content], {type:mime});
+  if(isSafariIOS() && navigator.share && navigator.canShare){
+    const file = new File([blob], filename, {type:mime});
+    if(navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:filename}).catch(()=>{});
+      return;
+    }
+  }
+  if(isSafariIOS()){
+    const url = URL.createObjectURL(blob);
+    window.open(url,'_blank');
+    setTimeout(()=>URL.revokeObjectURL(url), 8000);
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);}, 1000);
+}
+
+function expCSV(){
+  togMenu();
+  const list = getFilteredFY().filter(r=>!r.isVersion);
+  if(!list.length){ showToast('⚠️ ไม่มีข้อมูล','err'); return; }
+  const h = ['ลำดับ','ปีงบ','เลขที่','ประเภท','หมวดย่อย','ชื่อธุรกิจ','ผู้รับอนุญาต','เบอร์โทร','วันที่ออก','วันหมดอายุ','ค่าธรรมเนียม','พื้นที่(ตร.ม.)','คนงาน','สถานะ','ที่อยู่','เขต','จังหวัด','หมายเหตุ','แก้ไขโดย','แก้ไขเมื่อ'];
+  const rows = list.map((r,i)=>[
+    i+1, r.fy, r.licenseNo, r.licenseType, r.subtype, r.businessName, r.ownerName, r.phone,
+    r.issueDate, r.expireDate, r.fee, r.area, r.workers, r.status, r.address, r.district, r.province, r.note,
+    r.updatedBy, r.updatedAt?new Date(r.updatedAt).toLocaleString('th-TH'):''
+  ].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv = '\uFEFF' + [h.join(','), ...rows].join('\n');
+  dlFile(csv, 'text/csv;charset=utf-8', 'ใบอนุญาต_'+fmtDate()+'.csv');
+  if(!isSafariIOS()) showToast('✅ ดาวน์โหลด CSV แล้ว','ok');
+}
+
+function expJSON(){
+  togMenu();
+  const list = getFilteredFY();
+  if(!list.length){ showToast('⚠️ ไม่มีข้อมูล','err'); return; }
+  const nr = list.map(({attachments,...rest})=>({
+    ...rest,
+    attachments: (attachments||[]).map(a=>({name:a.name, type:a.type, url:a.url}))
+  }));
+  const json = JSON.stringify({exportedAt:new Date().toISOString(), exportedBy:currentUser?.email, records:nr}, null, 2);
+  dlFile(json, 'application/json;charset=utf-8', 'ใบอนุญาต_backup_'+fmtDate()+'.json');
+  if(!isSafariIOS()) showToast('✅ ดาวน์โหลด JSON แล้ว','ok');
+}
+
+// ═════════════════════════════════════
+// TOAST
+// ═════════════════════════════════════
+function showToast(m, kind){
+  const t = document.getElementById('toast');
+  t.textContent = m;
+  t.className = kind ? kind+' show' : 'show';
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// auto-refresh every 60s
+setInterval(()=>{
+  if(currentUser && document.visibilityState==='visible' && !isLoading){
+    reloadAll();
+  }
+}, 60000);
+</script>
+</body>
+</html>
